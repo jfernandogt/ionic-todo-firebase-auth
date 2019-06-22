@@ -11,13 +11,33 @@
       <ul class="todo-list">
         <li *ngFor="let todo of todos" [class.completed]="todo.completed" [class.editing]="todo.editing">
           <div class="view">
-            <input class="toggle" type="checkbox" (click)="toggleCompletion(todo)" [checked]="todo.completed">
-            <label (dblclick)="editTodo(todo)">{{todo.title}}</label>
+            <ion-checkbox
+              class="toggle"
+              (click)="toggleCompletion(todo)"
+              [checked]="todo.completed"
+            ></ion-checkbox>
+            <label (click)="editTodo(todo)">{{todo.title}}</label>
             <button class="destroy" (click)="remove(todo)"></button>
           </div>
-          <input class="edit" *ngIf="todo.editing" [value]="todo.title" #editedtodo (blur)="stopEditing(todo, editedtodo.value)" (keyup.enter)="updateEditingTodo(todo, editedtodo.value)" (keyup.escape)="cancelEditingTodo(todo)">
+          <ion-item *ngIf="todo.editing">
+            <ion-input class="edit" [value]="todo.title" #editedtodo (ionBlur)="cancelEditing(todo)"></ion-input>
+            <ion-button clear item-right (click)="updateEditingTodo(todo, editedtodo.value)">Guardar</ion-button>
+          </ion-item>
         </li>
       </ul>
     </div>
   </div>
+  <div class="footer" *ngIf="todos?.length > 0">
+		<span class="todo-count">
+      <strong>{{getRemaining()?.length}}</strong>
+      {{getRemaining().length == 1 ? 'item' : 'items'}} restantes
+    </span>
+    <button
+      class="clear-completed"
+      *ngIf="getCompleted()?.length > 0"
+      (click)="removeCompleted()"
+    >
+      Limpiar completados
+    </button>
+	</div>
 </ion-content>

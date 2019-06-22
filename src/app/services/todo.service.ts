@@ -2,22 +2,22 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 
 export class Todo {
-	completed: Boolean;
-	editing: Boolean;
+  completed: boolean;
+  editing: boolean;
 
-	private _title: String;
-	get title() {
-		return this._title;
-	}
-	set title(value: String) {
-		this._title = value.trim();
-	}
+  private _title: string;
+  get title() {
+    return this._title;
+  }
+  set title(value: string) {
+    this._title = value.trim();
+  }
 
-	constructor(title: String) {
-		this.completed = false;
-		this.editing = false;
-		this.title = title.trim();
-	}
+  constructor(title: string) {
+    this.completed = false;
+    this.editing = false;
+    this.title = title.trim();
+  }
 }
 
 @Injectable({
@@ -34,8 +34,8 @@ export class TodoService {
   async getTodos() {
     const todosStored = await this.storage.get('todos');
     const todos = JSON.parse(todosStored) || [];
-    this.todos = todos.map( (todo: {_title: String, completed: Boolean}) => {
-			let ret = new Todo(todo._title);
+    this.todos = todos.map( (todo: {_title: string, completed: boolean}) => {
+			const ret = new Todo(todo._title);
 			ret.completed = todo.completed;
 			return ret;
     });
@@ -45,16 +45,49 @@ export class TodoService {
   private updateStore() {
     this.storage.set('todos', JSON.stringify(this.todos));
   }
-  
-  remove(todo: Todo) {
-		this.todos.splice(this.todos.indexOf(todo), 1);
-		this.updateStore();
-	}
 
-  addTodo(title: String) {
+  addTodo(title: string) {
     this.todos.push(new Todo(title));
     this.updateStore();
 
     return this.todos;
   }
+
+  toggleCompletion(todo: Todo) {
+    todo.completed = !todo.completed;
+    this.updateStore();
+    return this.todos;
+  }
+
+  remove(todo: Todo) {
+		this.todos.splice(this.todos.indexOf(todo), 1);
+    this.updateStore();
+    return this.todos;
+  }
+  
+  updateTodo(todo: Todo) {
+    const index = this.todos.indexOf(todo);
+    if (index != -1) {
+      this.todos[index] = todo;
+    }
+    this.updateStore();
+  }
+
+  getCompleted() {
+		return this.getWithCompleted(true);
+  }
+
+  getRemaining() {
+		return this.getWithCompleted(false);
+  }
+
+  private getWithCompleted(completed: boolean) {
+		return this.todos.filter((todo: Todo) => todo.completed === completed);
+	}
+
+  removeCompleted() {
+		this.todos = this.getWithCompleted(false);
+    this.updateStore();
+    return this.todos;
+	}
 }
